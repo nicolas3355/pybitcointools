@@ -74,7 +74,7 @@ def raw_bip32_ckd(rawtuple, i, prefixes=DEFAULT):
     vbytes, depth, fingerprint, oldi, chaincode, key = rawtuple
     i = int(i)
 
-    private = vbytes == prefixes[0]
+    private = (vbytes in PRIVATE)
 
     if private:
         priv = key
