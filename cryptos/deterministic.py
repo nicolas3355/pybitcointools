@@ -98,14 +98,21 @@ def raw_bip32_ckd(rawtuple, i, prefixes=DEFAULT):
 
     return (vbytes, depth + 1, fingerprint, i, I[32:], newkey)
 
-
 def bip32_serialize(rawtuple, prefixes=DEFAULT):
     vbytes, depth, fingerprint, i, chaincode, key = rawtuple
+    # Ensure i is encoded correctly
     i = encode(i, 256, 4)
-    chaincode = encode(hash_to_int(chaincode), 256, 32)
-    keydata = b'\x00'+key[:-1] if vbytes == prefixes[0] else key
+    # Check the encoding of the chaincode
+    chaincode = chaincode if len(chaincode) == 32 else encode(hash_to_int(chaincode), 256, 32)
+    # Depending on whether it's a private or public key, format keydata
+    if vbytes in PRIVATE:  # if it's a private key, for both mainnet and testnet
+        keydata = b'\x00' + key[:-1]
+    else:  # it's a public key
+        keydata = key
+    # Assemble all the pieces
     bindata = vbytes + from_int_to_byte(depth % 256) + fingerprint + i + chaincode + keydata
-    return changebase(bindata+bin_dbl_sha256(bindata)[:4], 256, 58)
+    # Return the Base58Check encoded data
+    return changebase(bindata + bin_dbl_sha256(bindata)[:4], 256, 58)
 
 
 def bip32_deserialize(data, prefixes=DEFAULT):
@@ -117,9 +124,8 @@ def bip32_deserialize(data, prefixes=DEFAULT):
     fingerprint = dbin[5:9]
     i = decode(dbin[9:13], 256)
     chaincode = dbin[13:45]
-    key = dbin[46:78]+b'\x01' if vbytes == prefixes[0] else dbin[45:78]
+    key = dbin[46:78]+b'\x01' if vbytes in PRIVATE else dbin[45:78]
     return (vbytes, depth, fingerprint, i, chaincode, key)
-
 
 def is_xprv(text, prefixes=DEFAULT):
     try:
