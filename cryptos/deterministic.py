@@ -58,18 +58,53 @@ def crack_electrum_wallet(mpk, pk, n, for_change=0):
     offset = dbl_sha256(str(n)+':'+str(for_change)+':'+bin_mpk)
     return subtract_privkeys(pk, offset)
 
-# Below code ASSUMES binary inputs and compressed pubkeys
+# Mainnet
 MAINNET_PRIVATE = b'\x04\x88\xAD\xE4'
 MAINNET_PUBLIC = b'\x04\x88\xB2\x1E'
+
+# Testnet or Regression Test Mode
 TESTNET_PRIVATE = b'\x04\x35\x83\x94'
 TESTNET_PUBLIC = b'\x04\x35\x87\xCF'
-PRIVATE = [MAINNET_PRIVATE, TESTNET_PRIVATE]
-PUBLIC = [MAINNET_PUBLIC, TESTNET_PUBLIC]
+
+# Mainnet Multi-signature (p2sh)
+MAINNET_P2SH_PUBLIC = b'\x04\x9D\x7C\xB2'
+MAINNET_P2SH_PRIVATE = b'\x04\x9D\x78\x78'
+
+# Testnet Multi-signature (p2sh)
+TESTNET_P2SH_PUBLIC = b'\x04\x4A\x52\x62'
+TESTNET_P2SH_PRIVATE = b'\x04\x4A\x4E\x28'
+
+# Mainnet Segwit (p2wpkh-nested-in-p2sh)
+MAINNET_P2WPKH_NESTED_PUBLIC = b'\x04\xB2\x47\x46'
+MAINNET_P2WPKH_NESTED_PRIVATE = b'\x04\xB2\x43\x0C'
+
+# Testnet Segwit (p2wpkh-nested-in-p2sh)
+TESTNET_P2WPKH_NESTED_PUBLIC = b'\x04\x5F\x1C\xF6'
+TESTNET_P2WPKH_NESTED_PRIVATE = b'\x04\x5F\x18\xBC'
+
+# Private version bytes array
+PRIVATE = [
+    MAINNET_PRIVATE,
+    TESTNET_PRIVATE,
+    MAINNET_P2SH_PRIVATE,
+    TESTNET_P2SH_PRIVATE,
+    MAINNET_P2WPKH_NESTED_PRIVATE,
+    TESTNET_P2WPKH_NESTED_PRIVATE
+]
+
+# Public version bytes array
+PUBLIC = [
+    MAINNET_PUBLIC,
+    TESTNET_PUBLIC,
+    MAINNET_P2SH_PUBLIC,
+    TESTNET_P2SH_PUBLIC,
+    MAINNET_P2WPKH_NESTED_PUBLIC,
+    TESTNET_P2WPKH_NESTED_PUBLIC
+]
+
 DEFAULT = (MAINNET_PRIVATE, MAINNET_PUBLIC)
 
 # BIP32 child key derivation
-
-
 def raw_bip32_ckd(rawtuple, i, prefixes=DEFAULT):
     vbytes, depth, fingerprint, oldi, chaincode, key = rawtuple
     i = int(i)
